@@ -20,7 +20,7 @@ if uploaded_file:
     st.subheader("Raw Data")
     st.dataframe(df.head())
 
-    if 'Close' not in df.columns:
+    if 'Close/Last' not in df.columns:
         st.error("❌ CSV must contain a 'Close' column.")
     else:
         # Clean 'Close' column if it contains '$'
