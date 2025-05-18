@@ -24,10 +24,10 @@ if uploaded_file:
         st.error("❌ CSV must contain a 'Close' column.")
     else:
         # Clean 'Close' column if it contains '$'
-        df['Close'] = df['Close'].replace('[\$,]', '', regex=True).astype(float)
+        df['Close'] = df['Close/Last'].replace('[\$,]', '', regex=True).astype(float)
 
         # Load model and scaler
-        model = tf.keras.models.load_model('lstm_model.h5')
+        model = tf.keras.models.load_model('stock_price.h5')
         scaler = joblib.load('scaler.pkl')  # Make sure you saved this from training
 
         # Preprocessing
