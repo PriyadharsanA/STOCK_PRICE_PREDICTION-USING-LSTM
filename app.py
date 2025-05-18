@@ -53,8 +53,8 @@ if uploaded_file:
         # Plot predictions vs actual
         st.subheader("📊 Actual vs Predicted Stock Prices")
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.plot(y_actual, label='Actual Price', color='blue')
-        ax.plot(predictions, label='Predicted Price', color='orange')
+        ax.plot(y_actual, label='Actual Price', color='red')
+        ax.plot(predictions, label='Predicted Price', color='green')
         ax.set_title("Actual vs Predicted Stock Prices")
         ax.set_xlabel("Time Steps")
         ax.set_ylabel("Stock Price")
