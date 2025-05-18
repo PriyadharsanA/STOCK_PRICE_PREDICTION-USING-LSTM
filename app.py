@@ -28,7 +28,7 @@ if uploaded_file:
     if 'Close/Last' not in df.columns:
         st.error("CSV must contain a 'Close' column.")
     else:
-        data = df['Close'].values.reshape(-1, 1)
+        data = df['Close/Last'].values.reshape(-1, 1)
         scaler = MinMaxScaler(feature_range=(0, 1))
         scaled_data = scaler.fit_transform(data)
 
