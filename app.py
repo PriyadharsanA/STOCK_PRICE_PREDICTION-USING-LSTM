@@ -2,57 +2,61 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from tensorflow.keras.models import load_model
-from sklearn.preprocessing import MinMaxScaler
+import tensorflow as tf
+import joblib
 import os
 
+from sklearn.preprocessing import MinMaxScaler
+
 # App title
-st.title("📈 LSTM Stock Price Predictor")
+st.title("📈 Stock Price Prediction using LSTM")
 
-# Load model
-@st.cache_resource
-def load_lstm_model():
-    return load_model("stock_price.h5")  # Make sure this exists
-
-model = load_lstm_model()
-
-# Upload data
-st.subheader("Upload Stock Price CSV File")
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+# Upload file
+uploaded_file = st.file_uploader("Upload stock price CSV", type=['csv'])
 
 if uploaded_file:
     df = pd.read_csv(uploaded_file)
-    st.write("Data Preview", df.tail())
 
-    # Preprocessing (basic check)
-    if 'Close/Last' not in df.columns:
-        st.error("CSV must contain a 'Close' column.")
+    st.subheader("Raw Data")
+    st.dataframe(df.head())
+
+    if 'Close' not in df.columns:
+        st.error("❌ CSV must contain a 'Close' column.")
     else:
-        df["Close/Last"] = df["Close/Last"].str.replace("$", "", regex=False).astype(float)
-        data = df['Close/Last'].values.reshape(-1, 1)
-        scaler = MinMaxScaler(feature_range=(0, 1))
-        scaled_data = scaler.fit_transform(data)
+        # Clean 'Close' column if it contains '$'
+        df['Close'] = df['Close'].replace('[\$,]', '', regex=True).astype(float)
 
-        # Prepare input for prediction (last 60 days)
-        sequence_length = 60
-        if len(data) < sequence_length:
-            st.warning("Not enough data. Need at least 60 data points.")
-        else:
-            input_seq = scaled_data[-sequence_length:]
-            X_test = np.reshape(input_seq, (1, input_seq.shape[0], 1))
+        # Load model and scaler
+        model = tf.keras.models.load_model('lstm_model.h5')
+        scaler = joblib.load('scaler.pkl')  # Make sure you saved this from training
 
-            prediction = model.predict(X_test)
-            predicted_price = scaler.inverse_transform(prediction)[0][0]
+        # Preprocessing
+        close_prices = df['Close'].values.reshape(-1, 1)
+        scaled_data = scaler.transform(close_prices)
 
-            st.subheader("📊 Predicted Next Closing Price")
-            st.success(f"${predicted_price:.2f}")
+        # Prepare input for prediction
+        n_steps = 60
+        X_test = []
+        y_test = []
 
-            # Plot the last 100 days + prediction
-            fig, ax = plt.subplots()
-            ax.plot(df['Close/Last'][-100:], label='Historical Price')
-            ax.plot(len(df)-1, predicted_price, 'ro', label='Predicted Next')
-            ax.legend()
-            st.pyplot(fig)
+        for i in range(n_steps, len(scaled_data)):
+            X_test.append(scaled_data[i-n_steps:i])
+            y_test.append(scaled_data[i])
 
-else:
-    st.info("Upload a CSV file with a 'Close' column to get started.")
+        X_test, y_test = np.array(X_test), np.array(y_test)
+
+        # Predict
+        predictions = model.predict(X_test)
+        predictions = scaler.inverse_transform(predictions)
+        y_actual = scaler.inverse_transform(y_test.reshape(-1, 1))
+
+        # Plot predictions vs actual
+        st.subheader("📊 Actual vs Predicted Stock Prices")
+        fig, ax = plt.subplots(figsize=(10, 5))
+        ax.plot(y_actual, label='Actual Price', color='blue')
+        ax.plot(predictions, label='Predicted Price', color='orange')
+        ax.set_title("Actual vs Predicted Stock Prices")
+        ax.set_xlabel("Time Steps")
+        ax.set_ylabel("Stock Price")
+        ax.legend()
+        st.pyplot(fig)
