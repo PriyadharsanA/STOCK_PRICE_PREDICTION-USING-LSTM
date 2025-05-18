@@ -12,7 +12,7 @@ st.title("📈 LSTM Stock Price Predictor")
 # Load model
 @st.cache_resource
 def load_lstm_model():
-    return load_model("models/stock_lstm_model.h5")  # Make sure this exists
+    return load_model("stock_price.h5")  # Make sure this exists
 
 model = load_lstm_model()
 
