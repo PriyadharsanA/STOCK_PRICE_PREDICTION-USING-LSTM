@@ -49,7 +49,7 @@ if uploaded_file:
 
             # Plot the last 100 days + prediction
             fig, ax = plt.subplots()
-            ax.plot(df['Close'][-100:], label='Historical Price')
+            ax.plot(df['Close/Last'][-100:], label='Historical Price')
             ax.plot(len(df)-1, predicted_price, 'ro', label='Predicted Next')
             ax.legend()
             st.pyplot(fig)
