@@ -25,7 +25,7 @@ if uploaded_file:
     st.write("Data Preview", df.tail())
 
     # Preprocessing (basic check)
-    if 'Close' not in df.columns:
+    if 'Close/Last' not in df.columns:
         st.error("CSV must contain a 'Close' column.")
     else:
         data = df['Close'].values.reshape(-1, 1)
