@@ -60,3 +60,10 @@ if uploaded_file:
         ax.set_ylabel("Stock Price")
         ax.legend()
         st.pyplot(fig)
+
+        last_60_days = scaled_data[-n_steps:]
+        last_60_days = np.reshape(last_60_days, (1, n_steps, 1))
+        next_pred_scaled = model.predict(last_60_days)
+        next_price = scaler.inverse_transform(next_pred_scaled)[0][0]
+        st.subheader("🔮 Next Day Stock Price Prediction")
+        st.write(f"📌 Predicted Next Day Stock Price: **${next_price:.2f}**")
